@@ -20,7 +20,7 @@ You can find an example application that uses akka-http with _sangria_ here (it 
 
 [{{site.link.akka-http-example.github}}]({{site.link.akka-http-example.github}})
 
-I would also recommend you to check out [{{site.link.try}}]({{site.link.try}}).
+I would also recommend that you check out [{{site.link.try}}]({{site.link.try}}).
 It is an example of a GraphQL server written with the Play framework and Sangria. It also serves as a playground,
 where you can interactively execute GraphQL queries and play with some examples.
 
@@ -42,18 +42,18 @@ Here is an example of GraphQL client-server interaction:
 ![Client-server interaction]({{"/assets/img/graphql-api.svg" | prepend: site.baseurl}})
 
 As you can see, it's a typical HTTP-based client server interaction, where the client makes a POST HTTP request with GraphQL query in a post body
-and the server returns a JSON response. Though HTTP transport and JSON data format are not part of GraphQL specification and are not prescribed by it, 
-it's the most popular option for GraphQL server, so next sections will use these for examples.  
+and the server returns a JSON response. Though HTTP transport and JSON data format are not part of GraphQL specification, 
+they are the most popular option for GraphQL apps, and the following sections will use these methods.  
 
 Conceptually, during this interaction, both client and server provide important pieces of information to each other:
 
 ![Data Requirements]({{"/assets/img/data-requirements.svg" | prepend: site.baseurl}})
 
-Since GraphQL has a type system, the server defines a schema which clint can query with introspection API. This provides the client with a 
-a set possibilities. After client got this information and decided which parts of the data it needs, it's able to describe its data 
+Since GraphQL has a type system, the server defines a schema which a client can query with introspection API. This provides the client with a 
+a set possibilities. After the client recieves this information and decides which parts of the data it needs, it's able to describe its data 
 requirements in form of GraphQL _query_.  
 
-Important aspect of GraphQL is that it's completely backend agnostic. This means that you are free to choose the transport protocol, 
+An important aspect of GraphQL is that it's completely backend agnostic. This means that you are free to choose the transport protocol, 
 exposed data format, the data storage engine, etc. GraphQL and Sangria are just a thin layer inside of your Scala application that controls 
 the execution of your business logic:  
 
@@ -65,7 +65,7 @@ In the next sections we will go through the steps that will help you to build yo
 * Test the schema
 * Expose a GraphQL endpoint via HTTP (with akka-http and play)
 
-If you would like to learn more about GraphQL itself, I would highly recommend you to visit the [official GraphQL website](http://graphql.org).
+If you would like to learn more about GraphQL itself, I would highly recommend you visit the [official GraphQL website](http://graphql.org).
 
 ## Define a GraphQL Schema
 
@@ -98,8 +98,8 @@ type Query {
 }
 ```
 
-As you can see, you can define types and interfaces in GraphQL, just like in Scala. Exclamation mark (`!`) means that field is mandatory and 
-cannot return `null` values. Square brackets (`[...]`) signify the list types. GraphQL type system has enums, union types, scalars 
+As you can see, you can define types and interfaces in GraphQL, just like in Scala. Exclamation mark (`!`) means that a field is mandatory and 
+cannot return a `null` value. Square brackets (`[...]`) represent the list type. The GraphQL type system has enums, union types, scalars 
 and input object types, but we will not go deeper into these in this particular example. 
   
 Here is an example of GraphQL query that we will be able to execute against this schema:
@@ -126,7 +126,7 @@ We will discuss it in more detail later.
   
 ### Picture Type  
   
-First let's define a `Picture` GraphQL type. In scala, you most probably will model it a simple case class like this one:
+First let's define a `Picture` GraphQL type. In scala, you will probably model it with a simple case class like this one:
  
 ```scala
 case class Picture(width: Int, height: Int, url: Option[String])
@@ -149,10 +149,10 @@ val PictureType = ObjectType(
       resolve = _.value.url)))
 ```
 
-This is the most common way to define the GraphQL schema with Sangria. An `ObjectType` allows you to specify name, description
-and a list of fields that describes the `Picture` type. We also have defined this GraphQL type in terms of our, previously defined, `Picture`
+This is the most common way to define the GraphQL schema with Sangria. An `ObjectType` allows you to specify a name, description
+and a list of fields that describes the `Picture` type. We have also defined this GraphQL type in terms of our, previously defined, `Picture`
 case class. In order to identify what every GraphQL field should return during the query execution, we have provided a `resolve` function for
-every field. `resolve` function plays quite an important role since this is the place where you can define your own business logic. 
+every field. The `resolve` function plays quite an important role since this is the place where you can define your own business logic. 
 In this simple example we just use the context `value` (which would be of type `Product`) and extract specific property value from it. 
 But we can also perform more complex logic in this function, even access the data storage as we will see in the later example.
    
@@ -175,7 +175,7 @@ additional documentation to the object type itself and one of its fields, but yo
  
 ### Product Type and Identifiable Interface 
  
-Next let's define an interface for all types that have an `id` field. Scala equivalent will look like this simple trait:
+Next let's define an interface for all types that have an `id` field. The scala equivalent will look like this simple trait:
    
 ```scala
 trait Identifiable {
@@ -210,16 +210,16 @@ val ProductType =
 ```
 
 By default, macro will only consider the case class fields. In this example we explicitly asked macro to include `picture` method. 
-We also defined an implemented interface since this does not happen by default. `deriveObjectType` macro is also able to handle method 
+We also defined an implemented interface since this does not happen by default. The `deriveObjectType` macro is also able to handle method 
 arguments and translate them to GraphQL field arguments.   
 
 ### Query Type
 
-Finally we need to define a `Query` type. `Query` type is a bit special because it will define the top-level fields. You will use these 
-fields as an entry point in your GraphQL queries. Otherwise `Query` is the same object type that we already defined several times earlier. 
+Finally we need to define a `Query` type. The `Query` type is a bit special because it will define the top-level fields. You will use these 
+fields as entry points into your GraphQL schema. Otherwise `Query` is the same object type that we already defined several times earlier. 
 This time around, let's define it as a normal `ObjectType`, but before we will do this, we need to define a product repository 
-which will be responsible for loading the product information from a database or external service. For a simplicity sake, let's just use an in-memory 
-product list in this example:
+which will be responsible for loading the product information from a database or external service. To keep things simple, let's just use an in-memory 
+product list for this example:
 
 ```scala
 class ProductRepo {
@@ -250,9 +250,9 @@ val QueryType = ObjectType("Query", fields[ProductRepo, Unit](
     resolve = _.ctx.products)))
 ```
 
-As you may noticed, we have defined `Query` type in terms of `ProductRepo`, but we have provided it as a first type argument this time around.
+As you may have noticed, we have defined `Query` type in terms of `ProductRepo`, and we have provided it as a first type argument.
 We do not have a context value in this case because this type is an entry point for the whole query. Sangria allows you to provide user
-context object which is available to all GraphQL type fields withing the schema. The type of this object is provided via the first type argument. 
+context object which is available to all GraphQL type fields within the schema. The type of this object is provided via the first type argument. 
 In most cases this user context object provides access to a data storage (like database or external service), auth information and generally information that is common 
 and may be useful to all of the fields in your GraphQL schema.
 
@@ -266,7 +266,7 @@ val schema = Schema(QueryType)
 
 Given this schema definition, we now can execute queries against it. Let's write a small test and execute an example query against our schema.  
 
-For testing purpose, Sangria provides very convenient `graphql` macro which parses a GraphQL query and reports all syntax errors as a 
+For testing purpose, Sangria provides very convenient `graphql` macro which parses a GraphQL query and reports all syntax errors as  
 compile-time errors, if there are any:
 
 ```scala
@@ -326,7 +326,7 @@ The result of this query execution would be following JSON:
 }
 ```
 
-In this particular example I decided to use [circe](http://circe.io) JSON library. In order to use it you will also need to add following 
+In this particular example I decided to use [circe](http://circe.io) JSON library. In order to use it you will also need to add the following 
 library dependency in your SBT build:
   
 ```scala
@@ -408,7 +408,7 @@ in a request JSON body:
 * `variables` - `Object` - defines variables for your query (optional)
 * `operationName` - `String` - a name of an operation, in case you defined several of them in the query (optional)
 
-After we extracted these fields, we parse the query and execute it:
+After we extract these fields, we parse the query and execute it:
  
 ```scala
 import sangria.marshalling.sprayJson._
@@ -488,9 +488,9 @@ def executeGraphQLQuery(query: Document, op: Option[String], vars: JsObject) =
     }
 ```
 
-I recommend you to check out [{{site.link.try}}]({{site.link.try}}) for more detailed example of a Play application.
+I recommend you check out [{{site.link.try}}]({{site.link.try}}) for a more detailed example of a Play application.
 
 ## Next steps
 
-This page highlights only a small subset of sangria capabilities and features. I would recommend you to play with [sangria-playground]({{site.link.try}}) mentioned above. You can also check
+This page highlights only a small subset of sangria capabilities and features. I would recommend you play with [sangria-playground]({{site.link.try}}) mentioned above. You can also check
 [in-depth sangria documentation]({{"/learn/" | prepend: site.baseurl}}).
